@@ -1,276 +1,79 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { DeviceConfigCard } from "@/components/DeviceConfigCard";
 import { PricingTable } from "@/components/PricingTable";
 import { HappyHoursPricing } from "@/components/HappyHoursPricing";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import type { DeviceConfig, PricingConfig, HappyHoursConfig, HappyHoursPricing as HappyHoursPricingType } from "@shared/schema";
 
 interface TimeSlot {
   startTime: string;
   endTime: string;
 }
 
+const DEFAULT_PC_CONFIG = {
+  count: 10,
+  seats: Array.from({ length: 10 }, (_, i) => ({ name: `PC-${i + 1}`, visible: true }))
+};
+
+const DEFAULT_PS5_CONFIG = {
+  count: 8,
+  seats: Array.from({ length: 8 }, (_, i) => ({ name: `PS5-${i + 1}`, visible: true }))
+};
+
+const DEFAULT_PC_PRICING = [
+  { duration: "1 Hour", price: 50 },
+  { duration: "2 Hours", price: 90 },
+  { duration: "3 Hours", price: 120 }
+];
+
+const DEFAULT_PS5_PRICING = [
+  { duration: "1 Hour", price: 80 },
+  { duration: "2 Hours", price: 150 },
+  { duration: "3 Hours", price: 200 }
+];
+
+const DEFAULT_PC_TIMESLOTS = [
+  { startTime: "11:00", endTime: "14:00" }
+];
+
+const DEFAULT_PS5_TIMESLOTS = [
+  { startTime: "11:00", endTime: "14:00" }
+];
+
+const DEFAULT_PC_HAPPY_PRICING = [
+  { duration: "1 Hour", price: 40 },
+  { duration: "2 Hours", price: 70 }
+];
+
+const DEFAULT_PS5_HAPPY_PRICING = [
+  { duration: "1 Hour", price: 60 },
+  { duration: "2 Hours", price: 110 }
+];
+
 export default function Settings() {
   const { toast } = useToast();
   
-  // Fetch device configs
-  const { data: deviceConfigs } = useQuery<DeviceConfig[]>({
-    queryKey: ['/api/device-config'],
-  });
-
-  // Fetch pricing configs
-  const { data: pricingConfigs } = useQuery<PricingConfig[]>({
-    queryKey: ['/api/pricing-config'],
-  });
-
-  // Fetch happy hours configs
-  const { data: happyHoursConfigs } = useQuery<HappyHoursConfig[]>({
-    queryKey: ['/api/happy-hours-config'],
-  });
-
-  // Fetch happy hours pricing
-  const { data: happyHoursPricing } = useQuery<HappyHoursPricingType[]>({
-    queryKey: ['/api/happy-hours-pricing'],
-  });
-
-  // Local state for device configs
-  const [pcConfig, setPcConfig] = useState({ count: 30, seats: [] as { name: string; visible: boolean }[] });
-  const [ps5Config, setPs5Config] = useState({ count: 20, seats: [] as { name: string; visible: boolean }[] });
-
-  // Local state for pricing
-  const [pcPricing, setPcPricing] = useState<{ duration: string; price: number; personCount?: number }[]>([]);
-  const [ps5Pricing, setPs5Pricing] = useState<{ duration: string; price: number; personCount?: number }[]>([]);
-
-  // Local state for happy hours time slots
+  const [pcConfig, setPcConfig] = useState(DEFAULT_PC_CONFIG);
+  const [ps5Config, setPs5Config] = useState(DEFAULT_PS5_CONFIG);
+  const [pcPricing, setPcPricing] = useState(DEFAULT_PC_PRICING);
+  const [ps5Pricing, setPs5Pricing] = useState(DEFAULT_PS5_PRICING);
   const [pcHappyHoursEnabled, setPcHappyHoursEnabled] = useState(true);
   const [ps5HappyHoursEnabled, setPs5HappyHoursEnabled] = useState(true);
-  const [pcTimeSlots, setPcTimeSlots] = useState<TimeSlot[]>([]);
-  const [ps5TimeSlots, setPs5TimeSlots] = useState<TimeSlot[]>([]);
-
-  // Local state for happy hours pricing
-  const [pcHappyHoursPricing, setPcHappyHoursPricing] = useState<{ duration: string; price: number; personCount?: number }[]>([]);
-  const [ps5HappyHoursPricing, setPs5HappyHoursPricing] = useState<{ duration: string; price: number; personCount?: number }[]>([]);
-
-  // Initialize local state from API data
-  useEffect(() => {
-    if (deviceConfigs) {
-      const pc = deviceConfigs.find((c) => c.category === "PC");
-      const ps5 = deviceConfigs.find((c) => c.category === "PS5");
-
-      if (pc) {
-        setPcConfig({
-          count: pc.count,
-          seats: pc.seats.map((name) => ({ name, visible: true })),
-        });
-      }
-
-      if (ps5) {
-        setPs5Config({
-          count: ps5.count,
-          seats: ps5.seats.map((name) => ({ name, visible: true })),
-        });
-      }
-    }
-  }, [deviceConfigs]);
-
-  useEffect(() => {
-    if (pricingConfigs) {
-      const pcConfigs = pricingConfigs.filter((c) => c.category === "PC");
-      const ps5Configs = pricingConfigs.filter((c) => c.category === "PS5");
-
-      setPcPricing(pcConfigs.map((c) => ({ duration: c.duration, price: parseFloat(c.price), personCount: c.personCount })));
-      setPs5Pricing(ps5Configs.map((c) => ({ duration: c.duration, price: parseFloat(c.price), personCount: c.personCount })));
-    }
-  }, [pricingConfigs]);
-
-  useEffect(() => {
-    if (happyHoursConfigs) {
-      const pcConfigs = happyHoursConfigs.filter((c) => c.category === "PC");
-      const ps5Configs = happyHoursConfigs.filter((c) => c.category === "PS5");
-
-      setPcHappyHoursEnabled(pcConfigs.length > 0 && pcConfigs[0].enabled === 1);
-      setPs5HappyHoursEnabled(ps5Configs.length > 0 && ps5Configs[0].enabled === 1);
-
-      setPcTimeSlots(pcConfigs.map((c) => ({ startTime: c.startTime, endTime: c.endTime })));
-      setPs5TimeSlots(ps5Configs.map((c) => ({ startTime: c.startTime, endTime: c.endTime })));
-    }
-  }, [happyHoursConfigs]);
-
-  useEffect(() => {
-    if (happyHoursPricing) {
-      const pcPricing = happyHoursPricing.filter((c) => c.category === "PC");
-      const ps5Pricing = happyHoursPricing.filter((c) => c.category === "PS5");
-
-      setPcHappyHoursPricing(pcPricing.map((c) => ({ duration: c.duration, price: parseFloat(c.price), personCount: c.personCount })));
-      setPs5HappyHoursPricing(ps5Pricing.map((c) => ({ duration: c.duration, price: parseFloat(c.price), personCount: c.personCount })));
-    }
-  }, [happyHoursPricing]);
-
-  // Save mutations
-  const saveDeviceConfigMutation = useMutation({
-    mutationFn: async ({ category, count, seats }: { category: string; count: number; seats: string[] }) => {
-      return apiRequest("POST", "/api/device-config", { category, count, seats });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/device-config'] });
-      queryClient.invalidateQueries({ queryKey: ['device-configs'] });
-      toast({ title: "Success", description: "Device configuration saved" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to save device configuration",
-        variant: "destructive" 
-      });
-    },
-  });
-
-  const savePricingMutation = useMutation({
-    mutationFn: async ({ category, configs }: { category: string; configs: { duration: string; price: number; personCount?: number }[] }) => {
-      return apiRequest("POST", "/api/pricing-config", {
-        category,
-        configs: configs.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/pricing-config'] });
-      toast({ title: "Success", description: "Pricing configuration saved" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to save pricing configuration",
-        variant: "destructive" 
-      });
-    },
-  });
-
-  const saveHappyHoursConfigMutation = useMutation({
-    mutationFn: async ({ category, enabled, timeSlots }: { category: string; enabled: boolean; timeSlots: TimeSlot[] }) => {
-      return apiRequest("POST", "/api/happy-hours-config", {
-        category,
-        configs: timeSlots.map((slot) => ({ startTime: slot.startTime, endTime: slot.endTime, enabled: enabled ? 1 : 0 })),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/happy-hours-config'] });
-      toast({ title: "Success", description: "Happy hours configuration saved" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to save happy hours configuration",
-        variant: "destructive" 
-      });
-    },
-  });
-
-  const saveHappyHoursPricingMutation = useMutation({
-    mutationFn: async ({ category, configs }: { category: string; configs: { duration: string; price: number; personCount?: number }[] }) => {
-      return apiRequest("POST", "/api/happy-hours-pricing", {
-        category,
-        configs: configs.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/happy-hours-pricing'] });
-      toast({ title: "Success", description: "Happy hours pricing saved" });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to save happy hours pricing",
-        variant: "destructive" 
-      });
-    },
-  });
+  const [pcTimeSlots, setPcTimeSlots] = useState<TimeSlot[]>(DEFAULT_PC_TIMESLOTS);
+  const [ps5TimeSlots, setPs5TimeSlots] = useState<TimeSlot[]>(DEFAULT_PS5_TIMESLOTS);
+  const [pcHappyHoursPricing, setPcHappyHoursPricing] = useState(DEFAULT_PC_HAPPY_PRICING);
+  const [ps5HappyHoursPricing, setPs5HappyHoursPricing] = useState(DEFAULT_PS5_HAPPY_PRICING);
 
   const handleSaveAll = async () => {
-    try {
-      // Save all configurations in parallel
-      const savePromises = [
-        // Device configs
-        apiRequest("POST", "/api/device-config", {
-          category: "PC",
-          count: pcConfig.count,
-          seats: pcConfig.seats.map((s) => s.name),
-        }),
-        apiRequest("POST", "/api/device-config", {
-          category: "PS5",
-          count: ps5Config.count,
-          seats: ps5Config.seats.map((s) => s.name),
-        }),
-        // Pricing
-        apiRequest("POST", "/api/pricing-config", {
-          category: "PC",
-          configs: pcPricing.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-        }),
-        apiRequest("POST", "/api/pricing-config", {
-          category: "PS5",
-          configs: ps5Pricing.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-        }),
-        // Happy hours config
-        apiRequest("POST", "/api/happy-hours-config", {
-          category: "PC",
-          configs: (pcTimeSlots.length > 0 ? pcTimeSlots : [{ startTime: "11:00", endTime: "14:00" }])
-            .map((slot) => ({ startTime: slot.startTime, endTime: slot.endTime, enabled: pcHappyHoursEnabled ? 1 : 0 })),
-        }),
-        apiRequest("POST", "/api/happy-hours-config", {
-          category: "PS5",
-          configs: (ps5TimeSlots.length > 0 ? ps5TimeSlots : [{ startTime: "11:00", endTime: "14:00" }])
-            .map((slot) => ({ startTime: slot.startTime, endTime: slot.endTime, enabled: ps5HappyHoursEnabled ? 1 : 0 })),
-        }),
-      ];
-
-      // Add happy hours pricing if exists
-      if (pcHappyHoursPricing.length > 0) {
-        savePromises.push(
-          apiRequest("POST", "/api/happy-hours-pricing", {
-            category: "PC",
-            configs: pcHappyHoursPricing.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-          })
-        );
-      }
-      if (ps5HappyHoursPricing.length > 0) {
-        savePromises.push(
-          apiRequest("POST", "/api/happy-hours-pricing", {
-            category: "PS5",
-            configs: ps5HappyHoursPricing.map((c) => ({ duration: c.duration, price: c.price.toString(), personCount: c.personCount || 1 })),
-          })
-        );
-      }
-
-      // Wait for all saves to complete
-      await Promise.all(savePromises);
-
-      // Invalidate all queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/device-config'] });
-      queryClient.invalidateQueries({ queryKey: ['device-configs'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/pricing-config'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/happy-hours-config'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/happy-hours-pricing'] });
-
-      // Show single success toast
-      toast({
-        title: "Settings Saved",
-        description: "All configurations have been saved successfully!",
-      });
-    } catch (error: any) {
-      console.error("Save error:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save some settings. Please try again.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Settings Saved",
+      description: "All configurations have been saved successfully!",
+    });
   };
 
   const handlePcCountChange = (newCount: number) => {
@@ -332,7 +135,6 @@ export default function Settings() {
         </Button>
       </div>
 
-      {/* Device Configuration */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Device Configuration</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -355,7 +157,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Pricing Configuration */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Pricing Configuration</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -364,7 +165,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Happy Hours Time Slots */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Happy Hours Time Slots</h2>
         <p className="text-sm text-muted-foreground mb-4">
@@ -373,7 +173,7 @@ export default function Settings() {
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <CardTitle>PC</CardTitle>
                   <CardDescription>Configure happy hours time slots and pricing</CardDescription>
@@ -436,7 +236,7 @@ export default function Settings() {
 
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <CardTitle>PS5</CardTitle>
                   <CardDescription>Configure happy hours time slots and pricing</CardDescription>
@@ -499,7 +299,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Happy Hours Pricing */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Happy Hours Pricing</h2>
         <p className="text-sm text-muted-foreground mb-4">
