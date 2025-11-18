@@ -290,8 +290,8 @@ export class DatabaseStorage implements IStorage {
         },
         {
           category: "PS5",
-          count: 5,
-          seats: ["PS5-1", "PS5-2", "PS5-3", "PS5-4", "PS5-5"]
+          count: 8,
+          seats: ["PS5-1", "PS5-2", "PS5-3", "PS5-4", "PS5-5", "PS5-6", "PS5-7", "PS5-8"]
         }
       ]);
 

@@ -30,6 +30,11 @@ import { z } from "zod";
  * Use this for serverless environments (Vercel)
  */
 export async function registerAppRoutes(app: Express): Promise<void> {
+  // Initialize defaults (device configs, pricing, food items, users)
+  // This ensures fresh Vercel deployments have proper demo data
+  await storage.initializeDefaults();
+  console.log('[Routes] Defaults initialized successfully');
+  
   app.get("/api/server-time", publicApiLimiter, async (req, res) => {
     res.json({ serverTime: new Date().toISOString() });
   });
