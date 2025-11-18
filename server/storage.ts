@@ -277,6 +277,16 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  constructor() {
+    // Safety check: prevent instantiation when database is not available
+    if (!db) {
+      throw new Error(
+        'DatabaseStorage cannot be instantiated without a database connection. ' +
+        'DATABASE_URL is not set. Use DemoStorage instead for demo/development mode.'
+      );
+    }
+  }
+
   async initializeDefaults(): Promise<void> {
     // Check if defaults already exist
     const existingDevices = await db.select().from(deviceConfigs);
@@ -1831,21 +1841,19 @@ export class DatabaseStorage implements IStorage {
 
 }
 
-// Auto-detect: Use DemoStorage when DATABASE_URL is not available, DatabaseStorage otherwise
+// Auto-detect: Use DemoStorage when database is not available, DatabaseStorage otherwise
 async function initializeStorage(): Promise<IStorage> {
-  // FORCE DEMO MODE: Always use DemoStorage (sample data, no database saving)
-  console.log('[Storage] DEMO MODE ACTIVE - using DemoStorage (sample data, changes not saved)');
-  const { DemoStorage } = await import('./demoStorage');
-  return new DemoStorage();
+  // Check if database connection is available (db is null when DATABASE_URL is not set)
+  if (!db) {
+    console.log('[Storage] DEMO MODE ACTIVE - using DemoStorage (sample data, changes not saved)');
+    console.log('[Storage] Reason: No database connection available (DATABASE_URL not set)');
+    const { DemoStorage } = await import('./demoStorage');
+    return new DemoStorage();
+  }
   
-  // Production mode (commented out):
-  // if (!process.env.DATABASE_URL) {
-  //   console.log('[Storage] No DATABASE_URL found - using DemoStorage (perfect for Vercel demo mode)');
-  //   const { DemoStorage } = await import('./demoStorage');
-  //   return new DemoStorage();
-  // }
-  // console.log('[Storage] DATABASE_URL found - using DatabaseStorage');
-  // return new DatabaseStorage();
+  // Database connection available - use DatabaseStorage
+  console.log('[Storage] DATABASE_URL found - using DatabaseStorage');
+  return new DatabaseStorage();
 }
 
 // Export a promise that resolves to the appropriate storage
