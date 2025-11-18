@@ -1,8 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Database, HardDrive, RefreshCw, AlertTriangle, CheckCircle2, Save, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { DeviceConfigCard } from "@/components/DeviceConfigCard";
@@ -14,26 +12,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { DeviceConfig, PricingConfig, HappyHoursConfig, HappyHoursPricing as HappyHoursPricingType } from "@shared/schema";
-
-interface DatabaseMetrics {
-  name: string;
-  projectId: string;
-  storageBytes: number;
-  storageMB: number;
-  limitMB: number;
-  percentUsed: number;
-  computeTimeSeconds: number;
-  activeTimeSeconds: number;
-  quotaResetAt: string | null;
-}
-
-interface StorageMetricsResponse {
-  databases: DatabaseMetrics[];
-  totalStorageMB: number;
-  totalLimitMB: number;
-  totalPercentUsed: number;
-  lastUpdated: string;
-}
 
 interface TimeSlot {
   startTime: string;
@@ -61,13 +39,6 @@ export default function Settings() {
   // Fetch happy hours pricing
   const { data: happyHoursPricing } = useQuery<HappyHoursPricingType[]>({
     queryKey: ['/api/happy-hours-pricing'],
-  });
-
-  // Fetch storage metrics (optional - won't block page if NEON_API_KEY not set)
-  const { data: metrics, isLoading: metricsLoading, error: metricsError } = useQuery<StorageMetricsResponse>({
-    queryKey: ["/api/storage/metrics"],
-    refetchInterval: 60000,
-    retry: false,
   });
 
   // Local state for device configs
@@ -348,29 +319,6 @@ export default function Settings() {
     setPs5TimeSlots(ps5TimeSlots.filter((_, i) => i !== index));
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString();
-  };
-
-  const getStatusColor = (percentUsed: number) => {
-    if (percentUsed >= 90) return "text-red-500";
-    if (percentUsed >= 75) return "text-yellow-500";
-    return "text-green-500";
-  };
-
-  const getStatusIcon = (percentUsed: number) => {
-    if (percentUsed >= 90) return <AlertTriangle className="h-4 w-4 text-red-500" />;
-    if (percentUsed >= 75) return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-    return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-  };
-
-  const getProgressColor = (percentUsed: number) => {
-    if (percentUsed >= 90) return "[&>*]:bg-red-500";
-    if (percentUsed >= 75) return "[&>*]:bg-yellow-500";
-    return "[&>*]:bg-green-500";
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -383,84 +331,6 @@ export default function Settings() {
           Save Changes
         </Button>
       </div>
-
-      {/* Storage Metrics Section */}
-      {metrics && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <HardDrive className="h-5 w-5" />
-                  Storage Usage
-                </CardTitle>
-                <CardDescription>
-                  Total available storage across all databases
-                </CardDescription>
-              </div>
-              <Badge variant="outline" className="text-lg" data-testid="badge-total-usage">
-                {(metrics.totalStorageMB / 1024).toFixed(2)} GB / 3 GB
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Storage Used</span>
-                <span className={`text-sm font-bold ${getStatusColor(metrics.totalPercentUsed)}`} data-testid="text-total-percent">
-                  {metrics.totalPercentUsed.toFixed(2)}%
-                </span>
-              </div>
-              <Progress value={metrics.totalPercentUsed} className={`h-3 ${getProgressColor(metrics.totalPercentUsed)}`} data-testid="progress-total" />
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-muted-foreground">
-                  {metrics.totalStorageMB.toFixed(2)} MB used
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {(3072 - metrics.totalStorageMB).toFixed(2)} MB available
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-3 border-t">
-              <p className="text-xs text-muted-foreground">Last updated</p>
-              <p className="text-xs font-medium" data-testid="text-last-updated">
-                {formatDate(metrics.lastUpdated)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {metricsLoading && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HardDrive className="h-5 w-5" />
-              Storage Usage
-            </CardTitle>
-            <CardDescription>Loading storage metrics...</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {metricsError && !metrics && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              Storage Metrics Unavailable
-            </CardTitle>
-            <CardDescription>
-              Unable to fetch storage metrics. Please check your NEON_API_KEY configuration.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
 
       {/* Device Configuration */}
       <div>

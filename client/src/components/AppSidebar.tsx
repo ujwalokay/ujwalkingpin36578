@@ -123,13 +123,6 @@ const menuCategories: MenuCategory[] = [
         icon: Settings,
         tooltip: "Configure devices, pricing, and happy hours settings",
       },
-      {
-        title: "Terms & Conditions",
-        url: "/terms",
-        icon: Scale,
-        adminOnly: true,
-        tooltip: "View and manage service terms and conditions",
-      },
     ],
   },
 ];
