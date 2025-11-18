@@ -113,6 +113,15 @@ export default function Dashboard() {
   }>({ open: false, customerName: "", existingSeat: "", pendingBooking: null, shouldMerge: false, existingSession: null });
 
   // Dashboard keyboard shortcuts
+  const handleRefreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ['bookings'] });
+    queryClient.invalidateQueries({ queryKey: ['device-configs'] });
+    toast({
+      title: "Data Refreshed",
+      description: "Bookings and device configs have been refreshed",
+    });
+  };
+
   const dashboardShortcuts = useMemo(() => [
     {
       key: 'n',
@@ -129,14 +138,7 @@ export default function Dashboard() {
       key: 'r',
       ctrlKey: true,
       description: 'Refresh data',
-      action: () => {
-        queryClient.invalidateQueries({ queryKey: ['bookings'] });
-        queryClient.invalidateQueries({ queryKey: ['device-configs'] });
-        toast({
-          title: "Data Refreshed",
-          description: "Bookings and device configs have been refreshed",
-        });
-      },
+      action: handleRefreshData,
       category: 'Dashboard'
     },
     {
@@ -145,7 +147,7 @@ export default function Dashboard() {
       action: () => setHideCompleted(prev => !prev),
       category: 'Dashboard'
     }
-  ], [canMakeChanges, queryClient, toast]);
+  ], [canMakeChanges, handleRefreshData]);
 
   // Register dashboard shortcuts with context
   useRegisterShortcuts(dashboardShortcuts);
