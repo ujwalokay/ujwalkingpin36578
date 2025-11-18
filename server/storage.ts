@@ -285,13 +285,13 @@ export class DatabaseStorage implements IStorage {
       await db.insert(deviceConfigs).values([
         {
           category: "PC",
-          count: 5,
-          seats: ["PC-1", "PC-2", "PC-3", "PC-4", "PC-5"]
+          count: 10,
+          seats: ["PC-1", "PC-2", "PC-3", "PC-4", "PC-5", "PC-6", "PC-7", "PC-8", "PC-9", "PC-10"]
         },
         {
           category: "PS5",
-          count: 3,
-          seats: ["PS5-1", "PS5-2", "PS5-3"]
+          count: 5,
+          seats: ["PS5-1", "PS5-2", "PS5-3", "PS5-4", "PS5-5"]
         }
       ]);
 

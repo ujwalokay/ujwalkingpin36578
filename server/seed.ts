@@ -41,7 +41,7 @@ async function seed() {
       endTime: new Date(today.getTime() + 10 * 60 * 60 * 1000), // 10 AM
       price: "30",
       status: "running",
-      bookingType: "walk-in",
+      bookingType: ["walk-in"],
       foodOrders: [
         { foodId: "1", foodName: "Pizza", price: "8", quantity: 1 },
         { foodId: "2", foodName: "Soda", price: "2", quantity: 2 }
@@ -57,7 +57,7 @@ async function seed() {
       endTime: new Date(today.getTime() + 10 * 60 * 60 * 1000), // 10 AM
       price: "18",
       status: "running",
-      bookingType: "walk-in"
+      bookingType: ["walk-in"]
     });
 
     // Active PS5 booking
@@ -71,7 +71,7 @@ async function seed() {
       endTime: new Date(today.getTime() + 12 * 60 * 60 * 1000), // 12 PM
       price: "45",
       status: "running",
-      bookingType: "walk-in",
+      bookingType: ["walk-in"],
       foodOrders: [
         { foodId: "3", foodName: "Burger", price: "6", quantity: 1 }
       ]
@@ -88,7 +88,7 @@ async function seed() {
       price: "30",
       status: "paused",
       pausedRemainingTime: 45,
-      bookingType: "walk-in"
+      bookingType: ["walk-in"]
     });
 
     // Earlier completed bookings (different hours for hourly analytics)
@@ -101,7 +101,7 @@ async function seed() {
       endTime: new Date(today.getTime() + 7 * 60 * 60 * 1000), // 7 AM
       price: "18",
       status: "expired",
-      bookingType: "walk-in"
+      bookingType: ["walk-in"]
     });
 
     fakeBookings.push({
@@ -113,7 +113,7 @@ async function seed() {
       endTime: new Date(today.getTime() + 8 * 60 * 60 * 1000), // 8 AM
       price: "25",
       status: "expired",
-      bookingType: "walk-in",
+      bookingType: ["walk-in"],
       foodOrders: [
         { foodId: "4", foodName: "Fries", price: "3", quantity: 2 }
       ]
@@ -128,21 +128,21 @@ async function seed() {
       endTime: new Date(today.getTime() + 14 * 60 * 60 * 1000), // 2 PM
       price: "30",
       status: "expired",
-      bookingType: "walk-in"
+      bookingType: ["walk-in"]
     });
 
     // Add an upcoming booking (this should NOT appear in analytics)
     fakeBookings.push({
       category: "PS5",
-      seatNumber: 3,
-      seatName: "PS5-3",
+      seatNumber: 4,
+      seatName: "PS5-4",
       customerName: "Lisa Anderson",
       whatsappNumber: "+1234567892",
       startTime: new Date(today.getTime() + 18 * 60 * 60 * 1000), // 6 PM
       endTime: new Date(today.getTime() + 20 * 60 * 60 * 1000), // 8 PM
       price: "45",
       status: "upcoming",
-      bookingType: "walk-in"
+      bookingType: ["walk-in"]
     });
 
     // Insert all fake bookings
