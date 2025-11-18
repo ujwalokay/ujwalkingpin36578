@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { DEMO_DEVICE_CONFIGS, DEMO_BOOKINGS } from "@/lib/demoData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CategoryCard } from "@/components/CategoryCard";
@@ -152,12 +153,12 @@ export default function Dashboard() {
   // Apply shortcuts
   useKeyboardShortcuts(dashboardShortcuts);
 
-  const { data: dbBookings = [], isLoading } = useQuery({ 
+  const { data: dbBookings = DEMO_BOOKINGS, isLoading } = useQuery({ 
     queryKey: ['bookings'], 
     queryFn: fetchBookings 
   });
 
-  const { data: deviceConfigs = [] } = useQuery<DeviceConfig[]>({ 
+  const { data: deviceConfigs = DEMO_DEVICE_CONFIGS } = useQuery<DeviceConfig[]>({ 
     queryKey: ['device-configs'], 
     queryFn: fetchDeviceConfigs 
   });

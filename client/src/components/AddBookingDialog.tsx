@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { DEMO_PRICING_CONFIG, DEMO_HAPPY_HOURS_CONFIG, DEMO_HAPPY_HOURS_PRICING } from "@/lib/demoData";
 import {
   Dialog,
   DialogContent,
@@ -113,15 +114,15 @@ export function AddBookingDialog({ open, onOpenChange, onConfirm, availableSeats
   const [manualFreeHoursMin, setManualFreeHoursMin] = useState<string>("");
   const [showAddons, setShowAddons] = useState<boolean>(false);
 
-  const { data: pricingConfig = [] } = useQuery<PricingConfig[]>({
+  const { data: pricingConfig = DEMO_PRICING_CONFIG } = useQuery<PricingConfig[]>({
     queryKey: ["/api/pricing-config"],
   });
 
-  const { data: happyHoursConfigs = [] } = useQuery<HappyHoursConfig[]>({
+  const { data: happyHoursConfigs = DEMO_HAPPY_HOURS_CONFIG } = useQuery<HappyHoursConfig[]>({
     queryKey: ["/api/happy-hours-config"],
   });
 
-  const { data: happyHoursPricing = [] } = useQuery<HappyHoursPricing[]>({
+  const { data: happyHoursPricing = DEMO_HAPPY_HOURS_PRICING } = useQuery<HappyHoursPricing[]>({
     queryKey: ["/api/happy-hours-pricing"],
   });
 
