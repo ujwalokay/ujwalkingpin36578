@@ -1,0 +1,71 @@
+10:59:48.474 Running build in Washington, D.C., USA (East) – iad1
+10:59:48.475 Build machine configuration: 2 cores, 8 GB
+10:59:48.764 Cloning github.com/ujwalokay/ujwalkingpin36578 (Branch: main, Commit: daeb4eb)
+10:59:48.766 Previous build caches not available.
+10:59:50.792 Cloning completed: 2.027s
+10:59:51.337 Running "vercel build"
+10:59:51.733 Vercel CLI 48.10.2
+10:59:52.580 Running "install" command: `npm install`...
+10:59:57.665 npm warn deprecated csurf@1.11.0: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+10:59:59.051 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+10:59:59.052 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+11:00:00.926 npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+11:00:07.006 
+11:00:07.006 added 746 packages, and audited 747 packages in 14s
+11:00:07.007 
+11:00:07.007 85 packages are looking for funding
+11:00:07.007   run `npm fund` for details
+11:00:07.058 
+11:00:07.059 12 vulnerabilities (2 low, 5 moderate, 5 high)
+11:00:07.059 
+11:00:07.059 To address all issues possible (including breaking changes), run:
+11:00:07.059   npm audit fix --force
+11:00:07.060 
+11:00:07.060 Some issues need review, and may require choosing
+11:00:07.060 a different dependency.
+11:00:07.060 
+11:00:07.060 Run `npm audit` for details.
+11:00:07.373 
+11:00:07.373 > rest-express@1.0.0 build
+11:00:07.374 > npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+11:00:07.374 
+11:00:07.953 [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+11:00:08.007 transforming...
+11:00:09.840 
+11:00:09.841 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+11:00:18.415 [32m✓[39m 3454 modules transformed.
+11:00:19.455 rendering chunks...
+11:00:19.474 computing gzip size...
+11:00:19.512 [2m../dist/public/[22m[32mindex.html                                                                        [39m[1m[2m    2.41 kB[22m[1m[22m[2m │ gzip:   0.92 kB[22m
+11:00:19.513 [2m../dist/public/[22m[2massets/[22m[32mairavoto_logo-D4oncj45.png                                                 [39m[1m[2m   69.20 kB[22m[1m[22m
+11:00:19.513 [2m../dist/public/[22m[2massets/[22m[32mWhatsApp Image 2025-10-22 at 11.12.35_fa6763ad_1761112003243-Co8DSVW_.jpg  [39m[1m[2m  121.66 kB[22m[1m[22m
+11:00:19.514 [2m../dist/public/[22m[2massets/[22m[35mindex-BHQHxx9B.css                                                         [39m[1m[2m  128.16 kB[22m[1m[22m[2m │ gzip:  20.07 kB[22m
+11:00:19.520 [2m../dist/public/[22m[2massets/[22m[36mindex-B0ITGvzi.js                                                          [39m[1m[33m1,594.19 kB[39m[22m[2m │ gzip: 428.17 kB[22m
+11:00:19.520 [33m
+11:00:19.520 (!) Some chunks are larger than 500 kB after minification. Consider:
+11:00:19.521 - Using dynamic import() to code-split the application
+11:00:19.521 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+11:00:19.521 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+11:00:19.521 [32m✓ built in 11.54s[39m
+11:00:19.879 
+11:00:19.880   dist/index.js  192.5kb
+11:00:19.880 
+11:00:19.880 ⚡ Done in 17ms
+11:00:19.941 Installing dependencies...
+11:00:21.082 
+11:00:21.083 up to date in 1s
+11:00:21.084 
+11:00:21.084 85 packages are looking for funding
+11:00:21.084   run `npm fund` for details
+11:00:21.341 Using TypeScript 5.6.3 (local user-provided)
+11:00:31.128 server/ai-traffic.ts(52,54): error TS2367: This comparison appears to be unintentional because the types 'string[]' and 'string' have no overlap.
+11:00:31.129 server/ai-traffic.ts(82,56): error TS2367: This comparison appears to be unintentional because the types 'string[]' and 'string' have no overlap.
+11:00:31.130 server/ai-traffic.ts(87,56): error TS2367: This comparison appears to be unintentional because the types 'string[]' and 'string' have no overlap.
+11:00:31.130 
+11:00:38.151 Build Completed in /vercel/output [46s]
+11:00:38.552 Deploying outputs...
+11:00:45.848 Deployment completed
+11:00:46.474 Creating build cache...
+11:01:10.485 Created build cache: 24.011s
+11:01:10.487 Uploading build cache [98.90 MB]
+11:01:11.926 Build cache uploaded: 1.440s
