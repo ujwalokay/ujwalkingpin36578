@@ -61,26 +61,19 @@ app.use(cookieParser());
 // Mock session for demo mode - provides fake session data to routes
 app.use(mockSessionMiddleware);
 
-// Import route registration - this needs to be done synchronously
-// We'll use a lazy-loading approach to handle the async routes
+// Import route registration - use the pure function that doesn't create a server
 let routesInitialized = false;
 let routesPromise: Promise<void> | null = null;
 
-// Middleware to ensure routes are initialized before handling requests
+// Lazy-load routes to handle async imports
 app.use(async (req, res, next) => {
   if (!routesInitialized) {
     if (!routesPromise) {
       routesPromise = (async () => {
-        try {
-          // Dynamically import and register routes
-          const { registerRoutes } = await import('../server/routes');
-          await registerRoutes(app);
-          routesInitialized = true;
-          console.log('[Vercel] API routes registered successfully');
-        } catch (error) {
-          console.error('[Vercel] Error registering routes:', error);
-          throw error;
-        }
+        const { registerAppRoutes } = await import('../server/routes');
+        await registerAppRoutes(app);
+        routesInitialized = true;
+        console.log('[Vercel] API routes registered successfully');
       })();
     }
     await routesPromise;

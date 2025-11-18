@@ -25,7 +25,11 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+/**
+ * Pure route registration - ONLY registers routes, doesn't create server
+ * Use this for serverless environments (Vercel)
+ */
+export async function registerAppRoutes(app: Express): Promise<void> {
   app.get("/api/server-time", publicApiLimiter, async (req, res) => {
     res.json({ serverTime: new Date().toISOString() });
   });
@@ -1916,8 +1920,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message });
     }
   });
+}
 
+/**
+ * Traditional route registration WITH HTTP server creation
+ * Use this for traditional deployments (Replit, etc.)
+ */
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Register all routes
+  await registerAppRoutes(app);
+  
+  // Create and return HTTP server for traditional deployment
   const httpServer = createServer(app);
-
   return httpServer;
 }
