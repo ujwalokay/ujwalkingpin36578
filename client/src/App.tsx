@@ -7,9 +7,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { TourProvider, useTour } from "@/contexts/TourContext";
-import { Lock, Sparkles, Keyboard } from "lucide-react";
+import { Sparkles, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
@@ -33,7 +32,6 @@ import ConsumerGallery from "@/pages/ConsumerGallery";
 import ConsumerFacilities from "@/pages/ConsumerFacilities";
 import ConsumerGames from "@/pages/ConsumerGames";
 import NotFound from "@/pages/not-found";
-import Login from "@/pages/Login";
 import { ConsumerNav } from "@/components/ConsumerNav";
 import { CursorTrail } from "@/components/CursorTrail";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -41,8 +39,7 @@ import { NetworkAlert } from "@/components/NetworkAlert";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { InactivityRefreshPrompt } from "@/components/InactivityRefreshPrompt";
 import { FlipClock } from "@/components/FlipClock";
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useNetworkMonitor } from "@/hooks/useNetworkMonitor";
 
 function Router() {
@@ -66,49 +63,14 @@ function Router() {
   );
 }
 
-interface User {
-  id: string;
-  username: string;
-  role: "admin" | "staff";
-}
-
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { showAlert, handleRefresh, handleDismiss } = useNetworkMonitor();
+  const { showAlert, handleRefresh, handleDismiss} = useNetworkMonitor();
 
   const style = {
     "--sidebar-width": "16rem",
-  };
-
-  const handleLoginSuccess = (userData: User) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    setShowLogin(false);
-  };
-
-  const handleLock = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setUser(null);
-      setIsAuthenticated(false);
-      setShowLogin(true);
-      toast({
-        title: "Locked",
-        description: "Please login again to continue",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to logout",
-        variant: "destructive",
-      });
-    }
   };
 
 
@@ -126,13 +88,6 @@ function App() {
       ctrlKey: true,
       description: 'Show keyboard shortcuts',
       action: () => setShowShortcuts(true),
-      category: 'General'
-    },
-    {
-      key: 'l',
-      ctrlKey: true,
-      description: 'Lock screen',
-      action: handleLock,
       category: 'General'
     },
     {
@@ -223,34 +178,6 @@ function App() {
   // Register global shortcuts
   useKeyboardShortcuts(globalShortcuts);
 
-  useEffect(() => {
-    // Check if user is already authenticated via session
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include"
-        });
-        if (response.ok) {
-          const userData = await response.json();
-          
-          // Only grant full access if BOTH Google and staff/admin login are complete
-          if (userData.twoStepComplete && userData.id) {
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // Google verified but needs staff/admin login, or not authenticated
-            setShowLogin(true);
-          }
-        } else {
-          setShowLogin(true);
-        }
-      } catch (error) {
-        setShowLogin(true);
-      }
-    };
-    checkAuth();
-  }, []);
-
   if (showSplash) {
     return (
       <ThemeProvider>
@@ -259,118 +186,64 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Switch>
-              <Route path="/status" component={PublicStatus} />
-              <Route path="/analytics" component={Analytics} />
-              <Route path="/history" component={History} />
-              <Route path="/home">
-                <ConsumerNav />
-                <Home />
-              </Route>
-              <Route path="/gallery">
-                <ConsumerNav />
-                <ConsumerGallery />
-              </Route>
-              <Route path="/facilities">
-                <ConsumerNav />
-                <ConsumerFacilities />
-              </Route>
-              <Route path="/games">
-                <ConsumerNav />
-                <ConsumerGames />
-              </Route>
-              <Route path="/staff">
-                <Login onLoginSuccess={handleLoginSuccess} />
-              </Route>
-              <Route>
-                <Login onLoginSuccess={handleLoginSuccess} />
-              </Route>
-            </Switch>
-            <CursorTrail />
-            <Toaster />
-          </TooltipProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    );
-  }
-
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <ShortcutsProvider globalShortcuts={globalShortcuts}>
-          <AuthProvider user={user}>
-            <TourProvider>
-              <TooltipProvider>
-                <SidebarProvider style={style as React.CSSProperties}>
-                  <div className="flex h-screen w-full">
-                    <AppSidebar />
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <header className="flex items-center justify-between p-3 md:p-4 border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-                        <SidebarTrigger data-testid="button-sidebar-toggle" data-joyride="sidebar-toggle" />
-                        <div className="flex items-center gap-2 md:gap-4">
-                          {user && (
-                            <div className="text-xs md:text-sm font-medium hidden sm:block" data-testid="text-user-info">
-                              {user.username} <span className="text-xs text-muted-foreground hidden md:inline">({user.role})</span>
-                            </div>
-                          )}
-                          <div className="hidden md:block">
-                            <FlipClock />
-                          </div>
-                          <div data-joyride="notification-center">
-                            <NotificationCenter />
-                          </div>
-                          <div data-joyride="theme-toggle">
-                            <ThemeToggle />
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setShowShortcuts(true)}
-                            data-testid="button-shortcuts"
-                            aria-label="Keyboard shortcuts"
-                            className="h-8 w-8 md:h-10 md:w-10"
-                          >
-                            <Keyboard className="h-4 w-4 md:h-5 md:w-5" />
-                          </Button>
-                          <TakeTourButton />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleLock}
-                            data-testid="button-lock"
-                            aria-label="Lock screen"
-                            className="h-8 w-8 md:h-10 md:w-10"
-                          >
-                            <Lock className="h-4 w-4 md:h-5 md:w-5" />
-                          </Button>
+          <TourProvider>
+            <TooltipProvider>
+              <SidebarProvider style={style as React.CSSProperties}>
+                <div className="flex h-screen w-full">
+                  <AppSidebar />
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <header className="flex items-center justify-between p-3 md:p-4 border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                      <SidebarTrigger data-testid="button-sidebar-toggle" data-joyride="sidebar-toggle" />
+                      <div className="flex items-center gap-2 md:gap-4">
+                        <div className="text-xs md:text-sm font-medium hidden sm:block" data-testid="text-user-info">
+                          Demo Mode
                         </div>
-                      </header>
-                      <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
-                        <Router />
-                      </main>
-                    </div>
+                        <div className="hidden md:block">
+                          <FlipClock />
+                        </div>
+                        <div data-joyride="notification-center">
+                          <NotificationCenter />
+                        </div>
+                        <div data-joyride="theme-toggle">
+                          <ThemeToggle />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowShortcuts(true)}
+                          data-testid="button-shortcuts"
+                          aria-label="Keyboard shortcuts"
+                          className="h-8 w-8 md:h-10 md:w-10"
+                        >
+                          <Keyboard className="h-4 w-4 md:h-5 md:w-5" />
+                        </Button>
+                        <TakeTourButton />
+                      </div>
+                    </header>
+                    <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
+                      <Router />
+                    </main>
                   </div>
-                </SidebarProvider>
-                <KeyboardShortcutsDialog 
-                  open={showShortcuts} 
-                  onOpenChange={setShowShortcuts}
-                />
-                <NetworkAlert 
-                  open={showAlert}
-                  onRefresh={handleRefresh}
-                  onDismiss={handleDismiss}
-                />
-                <InactivityRefreshPrompt />
-                <CursorTrail />
-                <Toaster />
-              </TooltipProvider>
-            </TourProvider>
-          </AuthProvider>
+                </div>
+              </SidebarProvider>
+              <KeyboardShortcutsDialog 
+                open={showShortcuts} 
+                onOpenChange={setShowShortcuts}
+              />
+              <NetworkAlert 
+                open={showAlert}
+                onRefresh={handleRefresh}
+                onDismiss={handleDismiss}
+              />
+              <InactivityRefreshPrompt />
+              <CursorTrail />
+              <Toaster />
+            </TooltipProvider>
+          </TourProvider>
         </ShortcutsProvider>
       </QueryClientProvider>
     </ThemeProvider>

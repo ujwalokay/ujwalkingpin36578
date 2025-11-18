@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { webhookLimiter, publicApiLimiter, sensitiveOperationLimiter, dataExportLimiter } from "./auth";
+import { requireAuth, requireAdmin, requireAdminOrStaff, webhookLimiter, publicApiLimiter, sensitiveOperationLimiter, dataExportLimiter } from "./auth";
 import { retentionService } from "./retention";
 import { cleanupScheduler } from "./scheduler";
 import { fetchNeonStorageMetrics } from "./neon-metrics";
@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  app.get("/api/bookings", async (req, res) => {
+  app.get("/api/bookings", requireAuth, async (req, res) => {
     try {
       const bookings = await storage.getAllBookings();
       res.json(bookings);
@@ -43,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/bookings/available-seats", async (req, res) => {
+  app.get("/api/bookings/available-seats", requireAuth, async (req, res) => {
     try {
       const { date, timeSlot, durationMinutes } = req.query;
       
@@ -97,7 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/bookings/active", async (req, res) => {
+  app.get("/api/bookings/active", requireAuth, async (req, res) => {
     try {
       const bookings = await storage.getActiveBookings();
       res.json(bookings);
@@ -107,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.post("/api/bookings", async (req, res) => {
+  app.post("/api/bookings", requireAuth, async (req, res) => {
     try {
       const booking = insertBookingSchema.parse(req.body);
       
@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/bookings/:id", async (req, res) => {
+  app.patch("/api/bookings/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const existingBooking = await storage.getBooking(id);
@@ -335,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/bookings/:id/change-seat", async (req, res) => {
+  app.patch("/api/bookings/:id/change-seat", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { newSeatName } = req.body;
@@ -399,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/bookings/:id", async (req, res) => {
+  app.delete("/api/bookings/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const userRole = req.session.role;
@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookings/archive", async (req, res) => {
+  app.post("/api/bookings/archive", requireAuth, async (req, res) => {
     try {
       const count = await storage.moveBookingsToHistory();
       res.json({ success: true, count });
@@ -454,7 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookings/payment-method", sensitiveOperationLimiter, async (req, res) => {
+  app.post("/api/bookings/payment-method", sensitiveOperationLimiter, requireAuth, async (req, res) => {
     try {
       const { bookingIds, paymentMethod } = req.body;
       
@@ -473,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookings/payment-status", sensitiveOperationLimiter, async (req, res) => {
+  app.post("/api/bookings/payment-status", sensitiveOperationLimiter, requireAuth, async (req, res) => {
     try {
       const { bookingIds, paymentStatus, paymentMethod } = req.body;
       
@@ -513,7 +513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookings/split-payment", sensitiveOperationLimiter, async (req, res) => {
+  app.post("/api/bookings/split-payment", sensitiveOperationLimiter, requireAuth, async (req, res) => {
     try {
       const { bookingIds, cashAmount, upiAmount } = req.body;
       
@@ -600,7 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/booking-history", async (req, res) => {
+  app.get("/api/booking-history", requireAuth, async (req, res) => {
     try {
       const history = await storage.getAllBookingHistory();
       res.json(history);
@@ -609,7 +609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/stats", async (req, res) => {
+  app.get("/api/reports/stats", requireAuth, async (req, res) => {
     try {
       const period = req.query.period as string || "daily";
       const customStartDate = req.query.startDate as string;
@@ -651,7 +651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/history", async (req, res) => {
+  app.get("/api/reports/history", requireAuth, async (req, res) => {
     try {
       const period = req.query.period as string || "daily";
       const customStartDate = req.query.startDate as string;
@@ -693,7 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/retention-metrics", async (req, res) => {
+  app.get("/api/reports/retention-metrics", requireAuth, async (req, res) => {
     try {
       const period = (req.query.period as 'daily' | 'weekly' | 'monthly') || "monthly";
       const months = parseInt(req.query.months as string) || 6;
@@ -712,7 +712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/analytics/usage", async (req, res) => {
+  app.get("/api/analytics/usage", requireAuth, async (req, res) => {
     try {
       const timeRange = req.query.timeRange as string || "today";
       const allBookings = await storage.getAllBookings();
@@ -865,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/device-config", async (req, res) => {
+  app.get("/api/device-config", requireAuth, async (req, res) => {
     try {
       const configs = await storage.getAllDeviceConfigs();
       res.json(configs);
@@ -874,7 +874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/device-config", async (req, res) => {
+  app.post("/api/device-config", requireAdmin, async (req, res) => {
     try {
       const config = insertDeviceConfigSchema.parse(req.body);
       const saved = await storage.upsertDeviceConfig(config);
@@ -902,7 +902,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/pricing-config", async (req, res) => {
+  app.get("/api/pricing-config", requireAuth, async (req, res) => {
     try {
       const configs = await storage.getAllPricingConfigs();
       res.json(configs);
@@ -911,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/pricing-config", async (req, res) => {
+  app.post("/api/pricing-config", requireAdmin, async (req, res) => {
     try {
       const { category, configs } = req.body;
       if (!category || !Array.isArray(configs)) {
@@ -942,7 +942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/device-config/:category", async (req, res) => {
+  app.delete("/api/device-config/:category", requireAdmin, async (req, res) => {
     try {
       const { category } = req.params;
       await storage.deleteDeviceConfig(category);
@@ -952,7 +952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/pricing-config/:category", async (req, res) => {
+  app.delete("/api/pricing-config/:category", requireAdmin, async (req, res) => {
     try {
       const { category } = req.params;
       await storage.deletePricingConfig(category);
@@ -962,7 +962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/happy-hours-config", async (req, res) => {
+  app.get("/api/happy-hours-config", requireAuth, async (req, res) => {
     try {
       const configs = await storage.getAllHappyHoursConfigs();
       res.json(configs);
@@ -971,7 +971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/happy-hours-config", async (req, res) => {
+  app.post("/api/happy-hours-config", requireAdmin, async (req, res) => {
     try {
       const { category, configs } = req.body;
       if (!category || !Array.isArray(configs)) {
@@ -1003,7 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/happy-hours-config/:category", async (req, res) => {
+  app.delete("/api/happy-hours-config/:category", requireAdmin, async (req, res) => {
     try {
       const { category } = req.params;
       await storage.deleteHappyHoursConfig(category);
@@ -1039,7 +1039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/happy-hours-pricing", async (req, res) => {
+  app.get("/api/happy-hours-pricing", requireAuth, async (req, res) => {
     try {
       const configs = await storage.getAllHappyHoursPricing();
       res.json(configs);
@@ -1048,7 +1048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/happy-hours-pricing", async (req, res) => {
+  app.post("/api/happy-hours-pricing", requireAdmin, async (req, res) => {
     try {
       const { category, configs } = req.body;
       if (!category || !Array.isArray(configs)) {
@@ -1079,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/happy-hours-pricing/:category", async (req, res) => {
+  app.delete("/api/happy-hours-pricing/:category", requireAdmin, async (req, res) => {
     try {
       const { category } = req.params;
       await storage.deleteHappyHoursPricing(category);
@@ -1090,7 +1090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.get("/api/food-items", async (req, res) => {
+  app.get("/api/food-items", requireAuth, async (req, res) => {
     try {
       const items = await storage.getAllFoodItems();
       res.json(items);
@@ -1099,7 +1099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/food-items", async (req, res) => {
+  app.post("/api/food-items", requireAuth, async (req, res) => {
     try {
       const item = insertFoodItemSchema.parse(req.body);
       const created = await storage.createFoodItem(item);
@@ -1127,7 +1127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/food-items/:id", async (req, res) => {
+  app.patch("/api/food-items/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const item = insertFoodItemSchema.parse(req.body);
@@ -1157,7 +1157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/food-items/:id", async (req, res) => {
+  app.delete("/api/food-items/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const items = await storage.getAllFoodItems();
@@ -1189,7 +1189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/food-items/:id/adjust-stock", async (req, res) => {
+  app.post("/api/food-items/:id/adjust-stock", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { quantity, type, costPrice, supplier, expiryDate, notes } = schema.stockAdjustmentSchema.parse({ ...req.body, foodId: id });
@@ -1230,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/food-items/low-stock", async (req, res) => {
+  app.get("/api/food-items/low-stock", requireAuth, async (req, res) => {
     try {
       const items = await storage.getLowStockItems();
       res.json(items);
@@ -1239,7 +1239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/food-items/inventory", async (req, res) => {
+  app.get("/api/food-items/inventory", requireAuth, async (req, res) => {
     try {
       const items = await storage.getInventoryItems();
       res.json(items);
@@ -1248,7 +1248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/food-items/:id/add-to-inventory", async (req, res) => {
+  app.post("/api/food-items/:id/add-to-inventory", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const item = await storage.getFoodItem(id);
@@ -1283,7 +1283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/food-items/:id/remove-from-inventory", async (req, res) => {
+  app.post("/api/food-items/:id/remove-from-inventory", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const updated = await storage.removeFromInventory(id);
@@ -1309,7 +1309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/food-items/reorder-list", async (req, res) => {
+  app.get("/api/food-items/reorder-list", requireAuth, async (req, res) => {
     try {
       const items = await storage.getReorderList();
       res.json(items);
@@ -1318,7 +1318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/food-items/expiring", async (req, res) => {
+  app.get("/api/food-items/expiring", requireAuth, async (req, res) => {
     try {
       const daysAhead = parseInt(req.query.days as string) || 7;
       const items = await storage.getExpiringItems(daysAhead);
@@ -1328,7 +1328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/stock-batches", async (req, res) => {
+  app.get("/api/stock-batches", requireAuth, async (req, res) => {
     try {
       const batches = await storage.getAllStockBatches();
       res.json(batches);
@@ -1337,7 +1337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/stock-batches/:foodItemId", async (req, res) => {
+  app.get("/api/stock-batches/:foodItemId", requireAuth, async (req, res) => {
     try {
       const { foodItemId } = req.params;
       const batches = await storage.getStockBatchesByFoodItem(foodItemId);
@@ -1347,7 +1347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/expenses", async (req, res) => {
+  app.get("/api/expenses", requireAuth, async (req, res) => {
     try {
       const expenses = await storage.getAllExpenses();
       res.json(expenses);
@@ -1356,7 +1356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/expenses", async (req, res) => {
+  app.post("/api/expenses", requireAuth, async (req, res) => {
     try {
       const expense = insertExpenseSchema.parse(req.body);
       const created = await storage.createExpense(expense);
@@ -1370,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/expenses/:id", async (req, res) => {
+  app.patch("/api/expenses/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const expense = insertExpenseSchema.parse(req.body);
@@ -1384,7 +1384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/expenses/:id", async (req, res) => {
+  app.delete("/api/expenses/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await storage.deleteExpense(id);
@@ -1398,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activity Logs Routes
-  app.get("/api/activity-logs", async (req, res) => {
+  app.get("/api/activity-logs", requireAuth, async (req, res) => {
     try {
       const logs = await storage.getAllActivityLogs();
       res.json(logs);
@@ -1408,7 +1408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification Routes
-  app.get("/api/notifications", async (req, res) => {
+  app.get("/api/notifications", requireAuth, async (req, res) => {
     try {
       const notifications = await storage.getAllNotifications();
       res.json(notifications);
@@ -1417,7 +1417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/notifications/unread", async (req, res) => {
+  app.get("/api/notifications/unread", requireAuth, async (req, res) => {
     try {
       const notifications = await storage.getUnreadNotifications();
       res.json(notifications);
@@ -1426,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/notifications/unread-count", async (req, res) => {
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
     try {
       const count = await storage.getUnreadCount();
       res.json({ count });
@@ -1435,7 +1435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/notifications", async (req, res) => {
+  app.post("/api/notifications", requireAuth, async (req, res) => {
     try {
       const notification = insertNotificationSchema.parse(req.body);
       const created = await storage.createNotification(notification);
@@ -1445,7 +1445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/notifications/:id/read", async (req, res) => {
+  app.patch("/api/notifications/:id/read", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const updated = await storage.markNotificationAsRead(id);
@@ -1458,7 +1458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/notifications/read-all", async (req, res) => {
+  app.patch("/api/notifications/read-all", requireAuth, async (req, res) => {
     try {
       await storage.markAllNotificationsAsRead();
       res.json({ success: true });
@@ -1467,7 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/notifications/:id", async (req, res) => {
+  app.delete("/api/notifications/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await storage.deleteNotification(id);
@@ -1680,7 +1680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Data Retention Endpoints
-  app.get("/api/retention/config", async (req, res) => {
+  app.get("/api/retention/config", requireAdmin, async (req, res) => {
     try {
       const config = await retentionService.getConfig();
       res.json(config);
@@ -1689,7 +1689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/retention/cleanup", async (req, res) => {
+  app.post("/api/retention/cleanup", requireAdmin, async (req, res) => {
     try {
       const result = await cleanupScheduler.runNow();
       res.json({ 
@@ -1701,7 +1701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/retention/config", async (req, res) => {
+  app.put("/api/retention/config", requireAdmin, async (req, res) => {
     try {
       const updateSchema = z.object({
         bookingHistoryDays: z.number().min(1).optional(),
@@ -1727,7 +1727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Neon Storage Metrics Endpoint
-  app.get("/api/storage/metrics", async (req, res) => {
+  app.get("/api/storage/metrics", requireAdmin, async (req, res) => {
     try {
       const metrics = await fetchNeonStorageMetrics();
       res.json(metrics);
@@ -1750,7 +1750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Maintenance Prediction Routes
-  app.get("/api/ai/maintenance/predictions", async (req, res) => {
+  app.get("/api/ai/maintenance/predictions", requireAuth, async (req, res) => {
     try {
       const { generateMaintenancePredictions } = await import('./ai-maintenance');
       const predictions = await generateMaintenancePredictions();
@@ -1761,7 +1761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Traffic Prediction Routes
-  app.get("/api/ai/traffic/predictions", async (req, res) => {
+  app.get("/api/ai/traffic/predictions", requireAuth, async (req, res) => {
     try {
       const { generateTrafficPredictions } = await import('./ai-traffic');
       const predictions = await generateTrafficPredictions();
@@ -1772,7 +1772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.get("/api/maintenance", async (req, res) => {
+  app.get("/api/maintenance", requireAuth, async (req, res) => {
     try {
       const maintenanceRecords = await storage.getAllDeviceMaintenance();
       res.json(maintenanceRecords);
@@ -1781,7 +1781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/maintenance", async (req, res) => {
+  app.post("/api/maintenance", requireAuth, async (req, res) => {
     try {
       const maintenanceSchema = z.object({
         category: z.string(),
@@ -1812,7 +1812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/maintenance/:category/:seatName/status", async (req, res) => {
+  app.put("/api/maintenance/:category/:seatName/status", requireAuth, async (req, res) => {
     try {
       const { category, seatName } = req.params;
       const { status, notes } = req.body;
@@ -1841,7 +1841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/maintenance/:category/:seatName/report-issue", async (req, res) => {
+  app.post("/api/maintenance/:category/:seatName/report-issue", requireAuth, async (req, res) => {
     try {
       const { category, seatName } = req.params;
       const { issueType } = req.body;
@@ -1903,7 +1903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/customer/:whatsappNumber/active-bookings", async (req, res) => {
+  app.get("/api/customer/:whatsappNumber/active-bookings", requireAuth, async (req, res) => {
     try {
       const { whatsappNumber } = req.params;
       const allBookings = await storage.getAllBookings();
