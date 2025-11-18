@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.npm
+
+# Development files  
+*.log
+.DS_Store
+.env
+.env.local
+.env*.local
+
+# Replit specific
+.replit
+replit.nix
+.upm
+
+# Build artifacts (keep dist for deployment)
+.cache
+.tmp
+
+# Documentation and guides (not needed for deployment)
+*.md
+!package.json
+!package-lock.json
+
+# Local development
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Unnecessary server files (Vercel uses api/ folder)
+server/vite.ts
+
+# Test files
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
