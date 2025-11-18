@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import Joyride, { CallBackProps, Step, STATUS, EVENTS, ACTIONS } from "react-joyride";
-import { useAuth } from "./AuthContext";
 
 interface TourContextValue {
   startTour: () => void;
@@ -75,20 +74,15 @@ export function TourProvider({ children }: TourProviderProps) {
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState<Step[]>([]);
   const [stepIndex, setStepIndex] = useState(0);
-  const { user, onboardingCompleted } = useAuth();
-
-  const getTourCompletionKey = useCallback(() => {
-    return user?.id ? `${TOUR_COMPLETION_KEY}_${user.id}` : TOUR_COMPLETION_KEY;
-  }, [user?.id]);
 
   const isTourCompleted = useCallback(() => {
-    const completed = localStorage.getItem(getTourCompletionKey());
-    return completed === 'true' || onboardingCompleted;
-  }, [getTourCompletionKey, onboardingCompleted]);
+    const completed = localStorage.getItem(TOUR_COMPLETION_KEY);
+    return completed === 'true';
+  }, []);
 
   const markTourCompleted = useCallback(() => {
-    localStorage.setItem(getTourCompletionKey(), 'true');
-  }, [getTourCompletionKey]);
+    localStorage.setItem(TOUR_COMPLETION_KEY, 'true');
+  }, []);
 
   const startTour = useCallback(() => {
     setStepIndex(0);
@@ -96,10 +90,10 @@ export function TourProvider({ children }: TourProviderProps) {
   }, []);
 
   const resetTour = useCallback(() => {
-    localStorage.removeItem(getTourCompletionKey());
+    localStorage.removeItem(TOUR_COMPLETION_KEY);
     setStepIndex(0);
     setRun(true);
-  }, [getTourCompletionKey]);
+  }, []);
 
   const stopTour = useCallback(() => {
     setRun(false);
@@ -122,15 +116,6 @@ export function TourProvider({ children }: TourProviderProps) {
     }
   }, [markTourCompleted]);
 
-  useEffect(() => {
-    const shouldAutoStart = user && !isTourCompleted() && steps.length > 0;
-    if (shouldAutoStart) {
-      const timer = setTimeout(() => {
-        startTour();
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [user, isTourCompleted, steps.length, startTour]);
 
   const value: TourContextValue = {
     startTour,

@@ -155,17 +155,17 @@ app.use((req, res, next) => {
   // Using multiple Neon free projects (6 × 512 MB = 3 GB) to store all data
   // cleanupScheduler.start();
   
-  // Setup session middleware
-  app.set("trust proxy", 1);
-  app.use(getSession());
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // DEMO MODE: Use mock session instead of real authentication
+  // For production deployment, restore the session/OAuth setup below
+  const { mockSessionMiddleware } = await import("./mockSession");
+  app.use(mockSessionMiddleware);
   
-  // Setup Google OAuth (independent of Replit)
-  await setupGoogleAuth(app);
-  
-  // Register staff/admin authentication routes
-  registerAuthRoutes(app);
+  // Real session setup (disabled for demo mode):
+  // app.use(getSession());
+  // app.use(passport.initialize());
+  // app.use(passport.session());
+  // await setupGoogleAuth(app);
+  // registerAuthRoutes(app);
   
   const server = await registerRoutes(app);
 
