@@ -270,6 +270,8 @@ export interface IStorage {
   getPaymentLogs(date?: string): Promise<PaymentLog[]>;
   
   updatePaymentStatus(bookingIds: string[], paymentStatus: string, paymentMethod: string | null, userId: string): Promise<{ bookings: Booking[], count: number }>;
+  updatePaymentMethod(bookingIds: string[], paymentMethod: string): Promise<number>;
+  isHappyHoursActiveForTime(category: string, timeSlot: string): Promise<boolean>;
   
   initializeDefaults(): Promise<void>;
 }

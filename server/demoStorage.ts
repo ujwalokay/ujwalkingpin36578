@@ -57,34 +57,30 @@ export class DemoStorage implements IStorage {
       category: "PC",
       count: 10,
       seats: ["PC-1", "PC-2", "PC-3", "PC-4", "PC-5", "PC-6", "PC-7", "PC-8", "PC-9", "PC-10"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     },
     {
       id: "demo-ps5-1",
       category: "PS5",
       count: 8,
       seats: ["PS5-1", "PS5-2", "PS5-3", "PS5-4", "PS5-5", "PS5-6", "PS5-7", "PS5-8"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     },
   ];
 
   private demoPricingConfigs: PricingConfig[] = [
-    { id: "demo-pc-30m", category: "PC", duration: "30 mins", price: "10", createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-pc-1h", category: "PC", duration: "1 hour", price: "18", createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-pc-2h", category: "PC", duration: "2 hours", price: "30", createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-ps5-30m", category: "PS5", duration: "30 mins", price: "15", createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-ps5-1h", category: "PS5", duration: "1 hour", price: "25", createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-ps5-2h", category: "PS5", duration: "2 hours", price: "45", createdAt: new Date(), updatedAt: new Date() },
+    { id: "demo-pc-30m", category: "PC", duration: "30 mins", price: "10", personCount: 1 },
+    { id: "demo-pc-1h", category: "PC", duration: "1 hour", price: "18", personCount: 1 },
+    { id: "demo-pc-2h", category: "PC", duration: "2 hours", price: "30", personCount: 1 },
+    { id: "demo-ps5-30m", category: "PS5", duration: "30 mins", price: "15", personCount: 1 },
+    { id: "demo-ps5-1h", category: "PS5", duration: "1 hour", price: "25", personCount: 1 },
+    { id: "demo-ps5-2h", category: "PS5", duration: "2 hours", price: "45", personCount: 1 },
   ];
 
   private demoFoodItems: FoodItem[] = [
-    { id: "demo-food-1", name: "Pizza", price: "8", category: null, description: null, image: null, currentStock: 50, lowStockThreshold: 10, reorderLevel: 20, isInInventory: 1, createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-food-2", name: "Burger", price: "6", category: null, description: null, image: null, currentStock: 50, lowStockThreshold: 10, reorderLevel: 20, isInInventory: 1, createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-food-3", name: "Fries", price: "3", category: null, description: null, image: null, currentStock: 100, lowStockThreshold: 20, reorderLevel: 40, isInInventory: 1, createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-food-4", name: "Soda", price: "2", category: null, description: null, image: null, currentStock: 100, lowStockThreshold: 20, reorderLevel: 40, isInInventory: 1, createdAt: new Date(), updatedAt: new Date() },
-    { id: "demo-food-5", name: "Water", price: "1", category: null, description: null, image: null, currentStock: 150, lowStockThreshold: 30, reorderLevel: 60, isInInventory: 1, createdAt: new Date(), updatedAt: new Date() },
+    { id: "demo-food-1", name: "Pizza", price: "8", category: "Snacks", currentStock: 50, minStockLevel: 10, inInventory: 1, supplier: null, expiryDate: null, costPrice: "5" },
+    { id: "demo-food-2", name: "Burger", price: "6", category: "Snacks", currentStock: 50, minStockLevel: 10, inInventory: 1, supplier: null, expiryDate: null, costPrice: "3" },
+    { id: "demo-food-3", name: "Fries", price: "3", category: "Snacks", currentStock: 100, minStockLevel: 20, inInventory: 1, supplier: null, expiryDate: null, costPrice: "1" },
+    { id: "demo-food-4", name: "Soda", price: "2", category: "Beverages", currentStock: 100, minStockLevel: 20, inInventory: 1, supplier: null, expiryDate: null, costPrice: "1" },
+    { id: "demo-food-5", name: "Water", price: "1", category: "Beverages", currentStock: 150, minStockLevel: 30, inInventory: 1, supplier: null, expiryDate: null, costPrice: "0.5" },
   ];
 
   private bookings: Booking[] = [];
@@ -215,11 +211,8 @@ export class DemoStorage implements IStorage {
       ...item,
       id: `demo-food-${Date.now()}`,
       currentStock: 0,
-      lowStockThreshold: 10,
-      reorderLevel: 20,
-      isInInventory: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      minStockLevel: 10,
+      inInventory: 0,
     } as FoodItem;
     this.demoFoodItems.push(newItem);
     return newItem;
@@ -231,7 +224,6 @@ export class DemoStorage implements IStorage {
     this.demoFoodItems[index] = {
       ...this.demoFoodItems[index],
       ...item,
-      updatedAt: new Date(),
     };
     return this.demoFoodItems[index];
   }
@@ -252,7 +244,6 @@ export class DemoStorage implements IStorage {
     } else {
       item.currentStock = Math.max(0, item.currentStock - quantity);
     }
-    item.updatedAt = new Date();
     return item;
   }
 
@@ -283,15 +274,15 @@ export class DemoStorage implements IStorage {
   async upsertHappyHoursPricing(category: string, configs: InsertHappyHoursPricing[]): Promise<HappyHoursPricing[]> { return []; }
   async deleteHappyHoursPricing(category: string): Promise<boolean> { return false; }
   async getLowStockItems(): Promise<FoodItem[]> { return []; }
-  async getInventoryItems(): Promise<FoodItem[]> { return this.demoFoodItems.filter(f => f.isInInventory === 1); }
+  async getInventoryItems(): Promise<FoodItem[]> { return this.demoFoodItems.filter(f => f.inInventory === 1); }
   async addToInventory(id: string): Promise<FoodItem | undefined> {
     const item = this.demoFoodItems.find(f => f.id === id);
-    if (item) item.isInInventory = 1;
+    if (item) item.inInventory = 1;
     return item;
   }
   async removeFromInventory(id: string): Promise<FoodItem | undefined> {
     const item = this.demoFoodItems.find(f => f.id === id);
-    if (item) item.isInInventory = 0;
+    if (item) item.inInventory = 0;
     return item;
   }
   async getExpiringItems(daysAhead: number): Promise<FoodItem[]> { return []; }
@@ -302,22 +293,22 @@ export class DemoStorage implements IStorage {
   async getStockBatchesByFoodItem(foodItemId: string): Promise<StockBatch[]> { return []; }
   async getAllStockBatches(): Promise<StockBatch[]> { return []; }
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return { id: 'demo-user', username: 'Demo User', password: '', email: null, role: 'admin', onboardingCompleted: true, createdAt: new Date(), updatedAt: new Date() };
+    return { id: 'demo-user', username: 'Demo User', passwordHash: null, email: null, role: 'admin', onboardingCompleted: 1, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null };
   }
   async getUserById(id: string): Promise<User | undefined> {
-    return { id: 'demo-user', username: 'Demo User', password: '', email: null, role: 'admin', onboardingCompleted: true, createdAt: new Date(), updatedAt: new Date() };
+    return { id: 'demo-user', username: 'Demo User', passwordHash: null, email: null, role: 'admin', onboardingCompleted: 1, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null };
   }
   async getUser(id: string): Promise<User | undefined> {
-    return { id: 'demo-user', username: 'Demo User', password: '', email: null, role: 'admin', onboardingCompleted: true, createdAt: new Date(), updatedAt: new Date() };
+    return { id: 'demo-user', username: 'Demo User', passwordHash: null, email: null, role: 'admin', onboardingCompleted: 1, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null };
   }
   async createUser(user: InsertUser, skipPasswordValidation?: boolean): Promise<User> {
-    return { ...user, id: 'demo-user', email: null, onboardingCompleted: false, createdAt: new Date(), updatedAt: new Date() };
+    return { ...user, id: 'demo-user', email: null, passwordHash: null, onboardingCompleted: 0, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null, role: user.role || null };
   }
   async upsertUser(user: UpsertUser): Promise<User> {
-    return { ...user, id: 'demo-user', password: '', email: null, onboardingCompleted: false, createdAt: new Date(), updatedAt: new Date() } as User;
+    return { ...user, id: 'demo-user', passwordHash: null, email: null, onboardingCompleted: 0, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null } as User;
   }
   async validatePassword(username: string, password: string): Promise<User | null> {
-    return { id: 'demo-user', username: 'Demo User', password: '', email: null, role: 'admin', onboardingCompleted: true, createdAt: new Date(), updatedAt: new Date() };
+    return { id: 'demo-user', username: 'Demo User', passwordHash: null, email: null, role: 'admin', onboardingCompleted: 1, createdAt: null, updatedAt: null, firstName: null, lastName: null, profileImageUrl: null };
   }
   async updateUserOnboarding(userId: string, completed: boolean): Promise<boolean> { return true; }
   async getAllExpenses(): Promise<Expense[]> { return this.expenses; }
@@ -400,13 +391,13 @@ export class DemoStorage implements IStorage {
   }
   async updateDeviceMaintenanceStatus(category: string, seatName: string, status: string, notes?: string): Promise<DeviceMaintenance | undefined> { return undefined; }
   async getAllNotifications(): Promise<Notification[]> { return this.notifications; }
-  async getUnreadNotifications(): Promise<Notification[]> { return this.notifications.filter(n => !n.isRead); }
+  async getUnreadNotifications(): Promise<Notification[]> { return this.notifications.filter(n => n.isRead === 0); }
   async getNotificationById(id: string): Promise<Notification | undefined> { return this.notifications.find(n => n.id === id); }
   async createNotification(notification: InsertNotification): Promise<Notification> {
     const newNotification: Notification = {
       ...notification,
       id: `demo-notification-${Date.now()}`,
-      isRead: false,
+      isRead: 0,
       createdAt: new Date(),
     } as Notification;
     this.notifications.push(newNotification);
@@ -414,11 +405,11 @@ export class DemoStorage implements IStorage {
   }
   async markNotificationAsRead(id: string): Promise<Notification | undefined> {
     const notification = this.notifications.find(n => n.id === id);
-    if (notification) notification.isRead = true;
+    if (notification) notification.isRead = 1;
     return notification;
   }
   async markAllNotificationsAsRead(): Promise<void> {
-    this.notifications.forEach(n => n.isRead = true);
+    this.notifications.forEach(n => n.isRead = 1);
   }
   async deleteNotification(id: string): Promise<boolean> {
     const index = this.notifications.findIndex(n => n.id === id);
@@ -427,14 +418,15 @@ export class DemoStorage implements IStorage {
     return true;
   }
   async getUnreadCount(): Promise<number> {
-    return this.notifications.filter(n => !n.isRead).length;
+    return this.notifications.filter(n => n.isRead === 0).length;
   }
   async createPaymentLog(log: InsertPaymentLog): Promise<PaymentLog> {
-    return { ...log, id: `demo-payment-${Date.now()}`, timestamp: new Date() } as PaymentLog;
+    return { ...log, id: `demo-payment-${Date.now()}`, createdAt: new Date() } as PaymentLog;
   }
   async getPaymentLogs(date?: string): Promise<PaymentLog[]> { return []; }
   async updatePaymentStatus(bookingIds: string[], paymentStatus: string, paymentMethod: string | null, userId: string): Promise<{ bookings: Booking[], count: number }> {
     return { bookings: [], count: 0 };
   }
   async updatePaymentMethod(bookingIds: string[], paymentMethod: string): Promise<number> { return 0; }
+  async isHappyHoursActiveForTime(category: string, timeSlot: string): Promise<boolean> { return false; }
 }
