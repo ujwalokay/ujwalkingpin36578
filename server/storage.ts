@@ -594,7 +594,7 @@ export class DatabaseStorage implements IStorage {
 
     const customerVisits = new Map<string, { firstVisit: Date; visits: Array<{ date: Date; revenue: number }>; totalRevenue: number }>();
     
-    allBookings.forEach(booking => {
+    allBookings.forEach((booking: BookingHistory) => {
       let customerId: string | null = null;
       
       if (booking.whatsappNumber && booking.whatsappNumber.trim()) {
@@ -607,7 +607,7 @@ export class DatabaseStorage implements IStorage {
         return;
       }
       const foodRevenue = booking.foodOrders && booking.foodOrders.length > 0
-        ? booking.foodOrders.reduce((sum, order) => sum + parseFloat(order.price) * order.quantity, 0)
+        ? booking.foodOrders.reduce((sum: number, order: { foodId: string; foodName: string; price: string; quantity: number }) => sum + parseFloat(order.price) * order.quantity, 0)
         : 0;
       const totalRevenue = parseFloat(booking.price) + foodRevenue;
       
@@ -1686,7 +1686,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllNotifications(): Promise<Notification[]> {
     const result = await db.select().from(notifications).orderBy(desc(notifications.createdAt));
-    return result.filter(n => n.type !== "booking" && n.type !== "payment");
+    return result.filter((n: Notification) => n.type !== "booking" && n.type !== "payment");
   }
 
   async getUnreadNotifications(): Promise<Notification[]> {
@@ -1695,7 +1695,7 @@ export class DatabaseStorage implements IStorage {
       .from(notifications)
       .where(eq(notifications.isRead, 0))
       .orderBy(desc(notifications.createdAt));
-    return result.filter(n => n.type !== "booking" && n.type !== "payment");
+    return result.filter((n: Notification) => n.type !== "booking" && n.type !== "payment");
   }
 
   async getNotificationById(id: string): Promise<Notification | undefined> {
@@ -1731,7 +1731,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(notifications)
       .where(eq(notifications.isRead, 0));
-    return result.filter(n => n.type !== "booking" && n.type !== "payment").length;
+    return result.filter((n: Notification) => n.type !== "booking" && n.type !== "payment").length;
   }
 
   async getCustomerPromotionSummary(whatsappNumber: string): Promise<CustomerPromotionSummary> {
