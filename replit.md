@@ -8,6 +8,22 @@ This project is a local, full-stack TypeScript web application designed as an ad
 
 Preferred communication style: Simple, everyday language.
 
+## Deployment
+
+This application supports multiple deployment options:
+
+### Replit Deployment
+- One-click deployment using Replit's built-in "Publish" feature
+- Autoscaling configured for production use
+- Recommended for quick deployment and testing
+
+### Vercel Deployment
+- Fully configured for Vercel serverless deployment
+- Serverless functions with automatic scaling
+- Uses Neon PostgreSQL HTTP adapter for optimal serverless performance
+- Demo mode with mock sessions (no traditional session management)
+- See `VERCEL_DEPLOYMENT.md` and `VERCEL_QUICKSTART.md` for detailed instructions
+
 ## System Architecture
 
 ### Frontend Architecture
