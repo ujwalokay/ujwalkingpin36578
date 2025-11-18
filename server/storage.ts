@@ -372,7 +372,7 @@ export class DatabaseStorage implements IStorage {
       const staffPassword = process.env.STAFF_PASSWORD;
       
       if (staffUsername && staffPassword) {
-        const staffUserExists = existingUsers.some(u => u.username === staffUsername);
+        const staffUserExists = existingUsers.some((u: User) => u.username === staffUsername);
         
         if (!staffUserExists) {
           if (staffPassword.length < 8) {
@@ -452,11 +452,11 @@ export class DatabaseStorage implements IStorage {
       );
 
     const cashRevenue = completedBookings
-      .reduce((sum, booking) => {
+      .reduce((sum: number, booking: BookingHistory) => {
         if (booking.paymentMethod === "cash") {
           const sessionPrice = parseFloat(booking.price);
           const foodPrice = booking.foodOrders && booking.foodOrders.length > 0
-            ? booking.foodOrders.reduce((foodSum, order) => 
+            ? booking.foodOrders.reduce((foodSum: number, order: any) => 
                 foodSum + parseFloat(order.price) * order.quantity, 0)
             : 0;
           return sum + sessionPrice + foodPrice;
@@ -467,11 +467,11 @@ export class DatabaseStorage implements IStorage {
       }, 0);
 
     const upiRevenue = completedBookings
-      .reduce((sum, booking) => {
+      .reduce((sum: number, booking: BookingHistory) => {
         if (booking.paymentMethod === "upi_online") {
           const sessionPrice = parseFloat(booking.price);
           const foodPrice = booking.foodOrders && booking.foodOrders.length > 0
-            ? booking.foodOrders.reduce((foodSum, order) => 
+            ? booking.foodOrders.reduce((foodSum: number, order: any) => 
                 foodSum + parseFloat(order.price) * order.quantity, 0)
             : 0;
           return sum + sessionPrice + foodPrice;
@@ -481,17 +481,17 @@ export class DatabaseStorage implements IStorage {
         return sum;
       }, 0);
 
-    const paidBookings = completedBookings.filter(b => 
+    const paidBookings = completedBookings.filter((b: BookingHistory) => 
       b.paymentMethod === "cash" || b.paymentMethod === "upi_online" || b.paymentMethod === "split"
     );
 
-    const totalRevenue = paidBookings.reduce((sum, booking) => {
+    const totalRevenue = paidBookings.reduce((sum: number, booking: BookingHistory) => {
       return sum + parseFloat(booking.price);
     }, 0);
 
-    const totalFoodRevenue = paidBookings.reduce((sum, booking) => {
+    const totalFoodRevenue = paidBookings.reduce((sum: number, booking: BookingHistory) => {
       if (booking.foodOrders && booking.foodOrders.length > 0) {
-        return sum + booking.foodOrders.reduce((foodSum, order) => 
+        return sum + booking.foodOrders.reduce((foodSum: number, order: any) => 
           foodSum + parseFloat(order.price) * order.quantity, 0
         );
       }
@@ -500,7 +500,7 @@ export class DatabaseStorage implements IStorage {
 
     const totalSessions = completedBookings.length;
 
-    const totalMinutes = completedBookings.reduce((sum, booking) => {
+    const totalMinutes = completedBookings.reduce((sum: number, booking: BookingHistory) => {
       const duration = booking.endTime.getTime() - booking.startTime.getTime();
       return sum + (duration / 1000 / 60);
     }, 0);
@@ -528,7 +528,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    const bookingItems: BookingHistoryItem[] = completedBookings.map(booking => {
+    const bookingItems: BookingHistoryItem[] = completedBookings.map((booking: BookingHistory) => {
       const durationMs = booking.endTime.getTime() - booking.startTime.getTime();
       const durationMinutes = Math.round(durationMs / 1000 / 60);
       const hours = Math.floor(durationMinutes / 60);
@@ -544,7 +544,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       const foodAmount = booking.foodOrders && booking.foodOrders.length > 0
-        ? booking.foodOrders.reduce((sum, order) => sum + parseFloat(order.price) * order.quantity, 0)
+        ? booking.foodOrders.reduce((sum: number, order: any) => sum + parseFloat(order.price) * order.quantity, 0)
         : 0;
 
       const sessionPrice = parseFloat(booking.price);

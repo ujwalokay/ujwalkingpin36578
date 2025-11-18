@@ -1,0 +1,124 @@
+11:51:36.184 Running build in Washington, D.C., USA (East) – iad1
+11:51:36.187 Build machine configuration: 2 cores, 8 GB
+11:51:36.646 Cloning github.com/ujwalokay/ujwalkingpin36578 (Branch: main, Commit: d996e68)
+11:51:36.647 Previous build caches not available.
+11:51:38.570 Cloning completed: 1.924s
+11:51:38.631 Found .vercelignore
+11:51:38.639 Removed 15 ignored files defined in .vercelignore
+11:51:38.639   /.replit
+11:51:38.639   /DATA_RETENTION_SUMMARY.md
+11:51:38.639   /DEPLOYMENT.md
+11:51:38.639   /design_guidelines.md
+11:51:38.639   /DOCUMENTATION.md
+11:51:38.639   /GOOGLE_OAUTH_SETUP.md
+11:51:38.639   /NEON_6_DATABASE_SETUP.md
+11:51:38.639   /RENDER_DEPLOYMENT_GUIDE.md
+11:51:38.639   /RENDER_ENVIRONMENT_SETUP.md
+11:51:38.639   /replit.md
+11:51:39.132 Running "vercel build"
+11:51:39.530 Vercel CLI 48.10.2
+11:51:40.473 Running "install" command: `npm install`...
+11:51:45.558 npm warn deprecated csurf@1.11.0: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+11:51:46.753 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+11:51:46.810 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+11:51:48.804 npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+11:51:54.749 
+11:51:54.750 added 746 packages, and audited 747 packages in 14s
+11:51:54.751 
+11:51:54.751 85 packages are looking for funding
+11:51:54.751   run `npm fund` for details
+11:51:54.806 
+11:51:54.806 12 vulnerabilities (2 low, 5 moderate, 5 high)
+11:51:54.806 
+11:51:54.806 To address all issues possible (including breaking changes), run:
+11:51:54.806   npm audit fix --force
+11:51:54.807 
+11:51:54.807 Some issues need review, and may require choosing
+11:51:54.807 a different dependency.
+11:51:54.807 
+11:51:54.807 Run `npm audit` for details.
+11:51:55.089 
+11:51:55.089 > rest-express@1.0.0 build
+11:51:55.089 > npx vite build
+11:51:55.089 
+11:51:55.770 [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+11:51:55.825 transforming...
+11:51:57.649 
+11:51:57.649 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+11:52:05.812 [32m✓[39m 3454 modules transformed.
+11:52:06.831 rendering chunks...
+11:52:06.849 computing gzip size...
+11:52:06.887 [2m../dist/public/[22m[32mindex.html                                                                        [39m[1m[2m    2.41 kB[22m[1m[22m[2m │ gzip:   0.92 kB[22m
+11:52:06.888 [2m../dist/public/[22m[2massets/[22m[32mairavoto_logo-D4oncj45.png                                                 [39m[1m[2m   69.20 kB[22m[1m[22m
+11:52:06.891 [2m../dist/public/[22m[2massets/[22m[32mWhatsApp Image 2025-10-22 at 11.12.35_fa6763ad_1761112003243-Co8DSVW_.jpg  [39m[1m[2m  121.66 kB[22m[1m[22m
+11:52:06.894 [2m../dist/public/[22m[2massets/[22m[35mindex-C4vEO4bR.css                                                         [39m[1m[2m  127.85 kB[22m[1m[22m[2m │ gzip:  20.03 kB[22m
+11:52:06.894 [2m../dist/public/[22m[2massets/[22m[36mindex-D_kBL2mE.js                                                          [39m[1m[33m1,590.50 kB[39m[22m[2m │ gzip: 427.27 kB[22m
+11:52:06.894 [33m
+11:52:06.895 (!) Some chunks are larger than 500 kB after minification. Consider:
+11:52:06.895 - Using dynamic import() to code-split the application
+11:52:06.895 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+11:52:06.895 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+11:52:06.896 [32m✓ built in 11.09s[39m
+11:52:06.989 Installing dependencies...
+11:52:08.066 
+11:52:08.066 up to date in 1s
+11:52:08.067 
+11:52:08.067 85 packages are looking for funding
+11:52:08.067   run `npm fund` for details
+11:52:08.081 Running "npm run vercel-build"
+11:52:08.186 
+11:52:08.187 > rest-express@1.0.0 vercel-build
+11:52:08.187 > npx vite build
+11:52:08.187 
+11:52:08.709 [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+11:52:08.760 transforming...
+11:52:10.441 
+11:52:10.442 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+11:52:17.318 [32m✓[39m 3454 modules transformed.
+11:52:18.247 rendering chunks...
+11:52:18.265 computing gzip size...
+11:52:18.303 [2m../dist/public/[22m[32mindex.html                                                                        [39m[1m[2m    2.41 kB[22m[1m[22m[2m │ gzip:   0.92 kB[22m
+11:52:18.304 [2m../dist/public/[22m[2massets/[22m[32mairavoto_logo-D4oncj45.png                                                 [39m[1m[2m   69.20 kB[22m[1m[22m
+11:52:18.309 [2m../dist/public/[22m[2massets/[22m[32mWhatsApp Image 2025-10-22 at 11.12.35_fa6763ad_1761112003243-Co8DSVW_.jpg  [39m[1m[2m  121.66 kB[22m[1m[22m
+11:52:18.310 [2m../dist/public/[22m[2massets/[22m[35mindex-C4vEO4bR.css                                                         [39m[1m[2m  127.85 kB[22m[1m[22m[2m │ gzip:  20.03 kB[22m
+11:52:18.310 [2m../dist/public/[22m[2massets/[22m[36mindex-D_kBL2mE.js                                                          [39m[1m[33m1,590.50 kB[39m[22m[2m │ gzip: 427.27 kB[22m
+11:52:18.310 [32m✓ built in 9.57s[39m
+11:52:18.310 [33m
+11:52:18.310 (!) Some chunks are larger than 500 kB after minification. Consider:
+11:52:18.310 - Using dynamic import() to code-split the application
+11:52:18.311 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+11:52:18.311 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+11:52:18.578 Using TypeScript 5.6.3 (local user-provided)
+11:52:28.266 server/storage.ts(375,52): error TS7006: Parameter 'u' implicitly has an 'any' type.
+11:52:28.266 server/storage.ts(455,16): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.266 server/storage.ts(455,21): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.266 server/storage.ts(459,42): error TS7006: Parameter 'foodSum' implicitly has an 'any' type.
+11:52:28.266 server/storage.ts(459,51): error TS7006: Parameter 'order' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(470,16): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(470,21): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(474,42): error TS7006: Parameter 'foodSum' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(474,51): error TS7006: Parameter 'order' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(484,51): error TS7006: Parameter 'b' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(488,47): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(488,52): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(492,51): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(492,56): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(494,49): error TS7006: Parameter 'foodSum' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(494,58): error TS7006: Parameter 'order' implicitly has an 'any' type.
+11:52:28.267 server/storage.ts(503,52): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.268 server/storage.ts(503,57): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.269 server/storage.ts(531,70): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.274 server/storage.ts(547,38): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(547,43): error TS7006: Parameter 'order' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(597,25): error TS7006: Parameter 'booking' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(610,38): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(610,43): error TS7006: Parameter 'order' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(1689,26): error TS7006: Parameter 'n' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(1698,26): error TS7006: Parameter 'n' implicitly has an 'any' type.
+11:52:28.275 server/storage.ts(1734,26): error TS7006: Parameter 'n' implicitly has an 'any' type.
+11:52:28.275 
+11:52:34.090 Build Completed in /vercel/output [54s]
+11:52:34.472 Deploying outputs...
+11:52:36.165 Warning: Provided `memory` setting in `vercel.json` is ignored on Active CPU billing. You can safely remove this setting from your configuration. Learn more: https://vercel.com/docs/fluid-compute/pricing
+11:52:42.052 Deployment completed
+11:52:42.660 Creating build cache...
