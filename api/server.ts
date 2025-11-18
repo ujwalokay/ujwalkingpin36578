@@ -65,18 +65,40 @@ app.use(mockSessionMiddleware);
 let routesInitialized = false;
 let routesPromise: Promise<void> | null = null;
 
-// Lazy-load routes to handle async imports
+// Lazy-load routes to handle async imports and storage initialization
 app.use(async (req, res, next) => {
   if (!routesInitialized) {
     if (!routesPromise) {
       routesPromise = (async () => {
-        const { registerAppRoutes } = await import('../server/routes');
-        await registerAppRoutes(app);
-        routesInitialized = true;
-        console.log('[Vercel] API routes registered successfully');
+        try {
+          console.log('[Vercel] Initializing storage...');
+          const { storage } = await import('../server/storage');
+          await storage.initializeDefaults();
+          console.log('[Vercel] Storage initialized successfully');
+          
+          console.log('[Vercel] Registering routes...');
+          const { registerAppRoutes } = await import('../server/routes');
+          await registerAppRoutes(app);
+          routesInitialized = true;
+          console.log('[Vercel] API routes registered successfully');
+        } catch (error) {
+          console.error('[Vercel] Initialization error:', error);
+          throw error;
+        }
       })();
     }
-    await routesPromise;
+    try {
+      await routesPromise;
+    } catch (error) {
+      console.error('[Vercel] Failed to initialize:', error);
+      // Reset promise to allow retry on next request (prevents poisoning)
+      routesPromise = null;
+      return res.status(500).json({
+        error: 'Server initialization failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        retry: 'This was a transient error. Please try again.'
+      });
+    }
   }
   next();
 });
@@ -88,6 +110,26 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: 'vercel',
     routesInitialized 
+  });
+});
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  
+  console.error('[Vercel] Error occurred:', {
+    path: req.path,
+    method: req.method,
+    error: err.message,
+    stack: err.stack
+  });
+  
+  res.status(status).json({ 
+    error: 'An error occurred',
+    message: status === 500 
+      ? "An internal error occurred. Please try again later."
+      : err.message || "An error occurred",
+    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {})
   });
 });
 
