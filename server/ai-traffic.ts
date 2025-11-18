@@ -49,7 +49,7 @@ export async function generateTrafficPredictions(): Promise<TrafficPredictionRes
 
     const dayBookings = allHistoricalBookings.filter(b => {
       const start = new Date(b.startTime);
-      return start >= dayStart && start <= dayEnd && b.bookingType === "walk-in";
+      return start >= dayStart && start <= dayEnd && b.bookingType.includes("walk-in");
     });
 
     const hourlyPattern = Array.from({ length: 24 }, (_, hour) => {
@@ -79,12 +79,12 @@ export async function generateTrafficPredictions(): Promise<TrafficPredictionRes
 
   const todayActual = allBookings.filter(b => {
     const start = new Date(b.startTime);
-    return start >= todayStart && start <= todayEnd && b.bookingType === "walk-in";
+    return start >= todayStart && start <= todayEnd && b.bookingType.includes("walk-in");
   });
 
   const todayHistorical = allHistoricalBookings.filter(b => {
     const start = new Date(b.startTime);
-    return start >= todayStart && start <= todayEnd && b.bookingType === "walk-in";
+    return start >= todayStart && start <= todayEnd && b.bookingType.includes("walk-in");
   });
 
   const todayBookings = [...todayActual, ...todayHistorical];
