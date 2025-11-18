@@ -1829,4 +1829,31 @@ export class DatabaseStorage implements IStorage {
 
 }
 
-export const storage = new DatabaseStorage();
+// Auto-detect: Use DemoStorage when DATABASE_URL is not available, DatabaseStorage otherwise
+async function initializeStorage(): Promise<IStorage> {
+  if (!process.env.DATABASE_URL) {
+    console.log('[Storage] No DATABASE_URL found - using DemoStorage (perfect for Vercel demo mode)');
+    const { DemoStorage } = await import('./demoStorage');
+    return new DemoStorage();
+  }
+  
+  console.log('[Storage] DATABASE_URL found - using DatabaseStorage');
+  return new DatabaseStorage();
+}
+
+// Export a promise that resolves to the appropriate storage
+export const storagePromise = initializeStorage();
+
+// For backward compatibility, export a proxy that waits for initialization
+export const storage = new Proxy({} as IStorage, {
+  get: (_target, prop) => {
+    return async (...args: any[]) => {
+      const resolvedStorage = await storagePromise;
+      const method = (resolvedStorage as any)[prop];
+      if (typeof method === 'function') {
+        return method.apply(resolvedStorage, args);
+      }
+      return method;
+    };
+  }
+});
