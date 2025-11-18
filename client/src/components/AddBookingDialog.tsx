@@ -116,25 +116,60 @@ export function AddBookingDialog({ open, onOpenChange, onConfirm, availableSeats
 
   const { data: pricingConfig = DEMO_PRICING_CONFIG } = useQuery<PricingConfig[]>({
     queryKey: ["/api/pricing-config"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/pricing-config');
+        if (!response.ok) return DEMO_PRICING_CONFIG;
+        return response.json();
+      } catch (error) {
+        return DEMO_PRICING_CONFIG;
+      }
+    },
+    retry: false,
   });
 
   const { data: happyHoursConfigs = DEMO_HAPPY_HOURS_CONFIG } = useQuery<HappyHoursConfig[]>({
     queryKey: ["/api/happy-hours-config"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/happy-hours-config');
+        if (!response.ok) return DEMO_HAPPY_HOURS_CONFIG;
+        return response.json();
+      } catch (error) {
+        return DEMO_HAPPY_HOURS_CONFIG;
+      }
+    },
+    retry: false,
   });
 
   const { data: happyHoursPricing = DEMO_HAPPY_HOURS_PRICING } = useQuery<HappyHoursPricing[]>({
     queryKey: ["/api/happy-hours-pricing"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/happy-hours-pricing');
+        if (!response.ok) return DEMO_HAPPY_HOURS_PRICING;
+        return response.json();
+      } catch (error) {
+        return DEMO_HAPPY_HOURS_PRICING;
+      }
+    },
+    retry: false,
   });
 
   const { data: happyHoursStatus } = useQuery<{ active: boolean }>({
     queryKey: ["/api/happy-hours-active", category],
     queryFn: async () => {
       if (!category) return { active: false };
-      const response = await fetch(`/api/happy-hours-active/${category}`);
-      if (!response.ok) throw new Error('Failed to check happy hours status');
-      return response.json();
+      try {
+        const response = await fetch(`/api/happy-hours-active/${category}`);
+        if (!response.ok) return { active: false };
+        return response.json();
+      } catch (error) {
+        return { active: false };
+      }
     },
     enabled: !!category && bookingType === "walk-in",
+    retry: false,
   });
 
   // Check if Happy Hours is active for the selected upcoming time slot
@@ -142,11 +177,16 @@ export function AddBookingDialog({ open, onOpenChange, onConfirm, availableSeats
     queryKey: ["/api/happy-hours-active-for-time", category, timeSlot],
     queryFn: async () => {
       if (!category || !timeSlot) return { active: false };
-      const response = await fetch(`/api/happy-hours-active-for-time/${category}?timeSlot=${timeSlot}`);
-      if (!response.ok) throw new Error('Failed to check happy hours status for time slot');
-      return response.json();
+      try {
+        const response = await fetch(`/api/happy-hours-active-for-time/${category}?timeSlot=${timeSlot}`);
+        if (!response.ok) return { active: false };
+        return response.json();
+      } catch (error) {
+        return { active: false };
+      }
     },
     enabled: !!category && !!timeSlot && bookingType === "upcoming",
+    retry: false,
   });
 
   // Check if happy hours is active for walk-in bookings (current time)
@@ -156,7 +196,17 @@ export function AddBookingDialog({ open, onOpenChange, onConfirm, availableSeats
 
   const { data: allBookings = [] } = useQuery<Booking[]>({
     queryKey: ["/api/bookings"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/bookings');
+        if (!response.ok) return [];
+        return response.json();
+      } catch (error) {
+        return [];
+      }
+    },
     enabled: bookingType === "upcoming" && !!bookingDate,
+    retry: false,
   });
 
   const { data: upcomingAvailableSeats = [], isLoading: isLoadingSeats } = useQuery<{ category: string; seats: number[] }[]>({
@@ -166,19 +216,24 @@ export function AddBookingDialog({ open, onOpenChange, onConfirm, availableSeats
       durationMinutes 
     }],
     queryFn: async ({ queryKey }) => {
-      const [url, params] = queryKey as [string, { date?: string; timeSlot?: string; durationMinutes?: number }];
-      const searchParams = new URLSearchParams();
-      if (params.date) searchParams.append('date', params.date);
-      if (params.timeSlot) searchParams.append('timeSlot', params.timeSlot);
-      if (params.durationMinutes) searchParams.append('durationMinutes', params.durationMinutes.toString());
-      
-      const response = await fetch(`${url}?${searchParams.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch available seats');
+      try {
+        const [url, params] = queryKey as [string, { date?: string; timeSlot?: string; durationMinutes?: number }];
+        const searchParams = new URLSearchParams();
+        if (params.date) searchParams.append('date', params.date);
+        if (params.timeSlot) searchParams.append('timeSlot', params.timeSlot);
+        if (params.durationMinutes) searchParams.append('durationMinutes', params.durationMinutes.toString());
+        
+        const response = await fetch(`${url}?${searchParams.toString()}`);
+        if (!response.ok) {
+          return [];
+        }
+        return response.json();
+      } catch (error) {
+        return [];
       }
-      return response.json();
     },
     enabled: bookingType === "upcoming" && !!bookingDate && !!timeSlot && durationMinutes > 0,
+    retry: false,
   });
 
   const seatsToDisplay = bookingType === "upcoming" && bookingDate && timeSlot && durationMinutes > 0

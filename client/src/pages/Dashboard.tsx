@@ -155,12 +155,26 @@ export default function Dashboard() {
 
   const { data: dbBookings = DEMO_BOOKINGS, isLoading } = useQuery({ 
     queryKey: ['bookings'], 
-    queryFn: fetchBookings 
+    queryFn: async () => {
+      try {
+        return await fetchBookings();
+      } catch (error) {
+        return DEMO_BOOKINGS;
+      }
+    },
+    retry: false,
   });
 
   const { data: deviceConfigs = DEMO_DEVICE_CONFIGS } = useQuery<DeviceConfig[]>({ 
     queryKey: ['device-configs'], 
-    queryFn: fetchDeviceConfigs 
+    queryFn: async () => {
+      try {
+        return await fetchDeviceConfigs();
+      } catch (error) {
+        return DEMO_DEVICE_CONFIGS;
+      }
+    },
+    retry: false,
   });
 
   const categories = useMemo(() => {
